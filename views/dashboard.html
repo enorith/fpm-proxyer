@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPM Dashboard</title>
+</head>
+
+<style type="text/css">
+    table.gridtable {
+        font-family: verdana,arial,sans-serif;
+        font-size:11px;
+        color:#333333;
+        border-width: 1px;
+        border-color: #666666;
+        border-collapse: collapse;
+        float: left;
+        max-width: 500px;
+        margin-right: 50px;
+        margin-bottom: 50px;
+    }
+    table.gridtable th {
+        border-width: 1px;
+        padding: 8px;
+        border-style: solid;
+        border-color: #666666;
+        background-color: #dedede;
+    }
+    table.gridtable td {
+        border-width: 1px;
+        padding: 8px;
+        border-style: solid;
+        border-color: #666666;
+        background-color: #ffffff;
+    }
+</style>
+<body>
+    <div id="app">
+        <table class="gridtable">
+            <thead>
+                <tr>
+                    <td>Address</td>
+                    <td>Serving</td>
+                    <td>Pid</td>
+                    <td>Running</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in info">
+                    <td v-text="item.address"></td>
+                    <td v-text="item.serving"></td>
+                    <td v-text="item.pid"></td>
+                    <td v-text="item.running ? 'Y':'N'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/nerio-io-client/dist/messenger.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"
+    integrity="sha256-kXTEJcRFN330VirZFl6gj9+UM6gIKW195fYZeR3xDhc=" crossorigin="anonymous"></script>
+<script>
+    let url = new URL(window.location.href)
+    let m = new Messenger(url.host)
+    let ch = m.subscribe("report")
+    new Vue({
+        el: "#app",
+        data: {
+            info: []
+        },
+        mounted() {
+            ch.on("message", data => this.info = data.info)
+        }
+    })
+</script>
+</html>
