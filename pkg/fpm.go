@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 	"time"
 )
@@ -53,7 +54,7 @@ func (p *PHPCGI) Running() bool {
 
 func (p *PHPCGI) Serve() *PHPCGI {
 	if !p.running {
-		c := NewCommand(fmt.Sprintf("php-cgi.exe -b %s", p.address), nil)
+		c := NewCommand(fmt.Sprintf("%s -b %s", filepath.Join(p.binPath, "php-cgi.exe"), p.address), nil)
 		c.GoExec(p.binPath)
 		p.c = c
 		p.running = true

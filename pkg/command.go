@@ -68,7 +68,10 @@ func (c *Command) Pid() int {
 
 func (c *Command) GoExec(workDir string) {
 	go func() {
-		c.Exec(workDir)
+		_, err := c.Exec(workDir)
+		if err != nil {
+			c.logger.Print("commaned exec error: ", err)
+		}
 	}()
 }
 
