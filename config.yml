@@ -1,6 +1,6 @@
-listen: :9001
-dashboard: :9002
+listen: 127.0.0.1:9001
+dashboard: 127.0.0.1:9002
 binPath: C:\
 startPort: 19000
-maxProcess: 20
-idelProcess: 3
+maxProcess: 30
+idelProcess: 5

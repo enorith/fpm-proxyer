@@ -88,7 +88,8 @@ func run(cfg Config) {
 	dashboard := cfg.Dashboard
 
 	logger := log.Default()
-	logger.Printf("listen [tcp%s], dashboard [%s], binPath [%s], startPort [%d], maxProcess [%d]", listen, dashboard, cfg.BinPath, cfg.StartPort, cfg.MaxProcess)
+	logger.Printf("listen [%s], dashboard [%s], binPath [%s], startPort [%d], maxProcess [%d], idelProcess [%d]", listen, dashboard, cfg.BinPath,
+		cfg.StartPort, cfg.MaxProcess, cfg.IdelProcess)
 
 	fpm := pkg.NewFPM(cfg.StartPort, cfg.MaxProcess, cfg.BinPath)
 	done := make(chan os.Signal, 1)
@@ -101,7 +102,9 @@ func run(cfg Config) {
 			env := fcgi.ProcessEnv(r)
 			p := fpm.Select()
 			//logger.Printf("CGI address [%s], serving [%d], root %s", p.Address(), p.Serving(), env["DOCUMENT_ROOT"])
+			r.RequestURI = r.URL.Path
 
+			logger.Print(r)
 			h := newFastHandler("tcp", p.Address(), env)
 
 			h.ServeHTTP(rw, r)
@@ -124,7 +127,7 @@ func run(cfg Config) {
 			reportServer(srv, fpm)
 		}
 	}()
-	fpm.PruneInterval(1*time.Second, 3)
+	fpm.PruneInterval(5*time.Second, cfg.IdelProcess)
 
 	server := enorith.NewServer(func(request contracts.RequestContract) container.Interface {
 		return container.New()
@@ -176,7 +179,7 @@ func FPMParamMap(docRoot string, env map[string]string) gofast.Middleware {
 			req.Params["DOCUMENT_ROOT"] = docRoot
 			req.Params["SCRIPT_FILENAME"] = filepath.Join(docRoot, "index.php")
 			req.Params["SCRIPT_NAME"] = "index.php"
-			req.Params["REQUEST_URI"] = env["DOCUMENT_URI"]
+			// req.Params["REQUEST_URI"] = env["DOCUMENT_URI"]
 
 			return
 		}
