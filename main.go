@@ -104,7 +104,6 @@ func run(cfg Config) {
 			//logger.Printf("CGI address [%s], serving [%d], root %s", p.Address(), p.Serving(), env["DOCUMENT_ROOT"])
 			r.RequestURI = r.URL.Path
 
-			logger.Print(r)
 			h := newFastHandler("tcp", p.Address(), env)
 
 			h.ServeHTTP(rw, r)
