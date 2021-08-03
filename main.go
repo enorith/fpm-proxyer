@@ -105,9 +105,8 @@ func run(cfg Config) {
 			r.RequestURI = r.URL.Path
 
 			h := newFastHandler("tcp", p.Address(), env)
-
+			defer p.Served()
 			h.ServeHTTP(rw, r)
-			p.Served()
 		}))
 		if err != nil {
 			logger.Fatal(err)

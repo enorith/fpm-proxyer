@@ -141,6 +141,7 @@ func (f *FPM) Select() *PHPCGI {
 }
 
 func (f *FPM) Prune(left int) {
+	sort.Sort(f.cgis)
 	count := f.cgis.IdelCount()
 	if count > left {
 		kills := count - left
