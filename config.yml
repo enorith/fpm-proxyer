@@ -4,3 +4,4 @@ binPath: C:\Users\Nerio\php
 startPort: 19000
 maxProcess: 30
 idelProcess: 5
+timeout: 5

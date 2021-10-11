@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 
@@ -46,6 +47,7 @@ type Config struct {
 	StartPort   int    `yaml:"startPort"`
 	MaxProcess  int    `yaml:"maxProcess"`
 	IdelProcess int    `yaml:"idelProcess" default:"3"`
+	Timeout     int    `yaml:"timeout" default:"200"`
 }
 
 func main() {
@@ -105,8 +107,35 @@ func run(cfg Config) {
 			r.RequestURI = r.URL.Path
 
 			h := newFastHandler("tcp", p.Address(), env)
-			defer p.Served()
-			h.ServeHTTP(rw, r)
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				t := time.NewTimer(time.Duration(cfg.Timeout) * time.Second)
+				exit := make(chan struct{}, 1)
+				go func() {
+					h.ServeHTTP(rw, r)
+					exit <- struct{}{}
+				}()
+				for {
+					select {
+					case <-t.C:
+						wg.Done()
+						logger.Printf("cgi handle timeout [%ds], addr %s, pid %d", cfg.Timeout, p.Address(), p.Pid())
+						rw.WriteHeader(503)
+						_, e := rw.Write([]byte("cgi timeout"))
+						if e != nil {
+							logger.Println(e)
+						}
+						p.Stop()
+						return
+					case <-exit:
+						wg.Done()
+						return
+					}
+				}
+			}()
+			wg.Wait()
+			p.Served()
 		}))
 		if err != nil {
 			logger.Fatal(err)
