@@ -1,7 +1,7 @@
 # PHP-FPM for windows
 
 ## Install
-```$Env:GO111MODULE="on";go get -v github.com/enorith/fpm-proxyer```
+```go install github.com/enorith/fpm-proxyer@latest```
 
 ## Usage
 ```fpm-proxyer -c config.yml```
